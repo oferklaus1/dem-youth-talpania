@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link"
 import {
   logContactAction,
   nextCardAction,
@@ -99,7 +100,14 @@ export default function CallCard({ event }: { event: EventInfo }) {
   /* יציאה מהמסך לפני שחלף החלון — כותבים מיד */
   useEffect(() => commit, [commit]);
 
+
+
+
   /* ---------- פעולות ---------- */
+  
+
+
+
 
   const handleSave = useCallback(
     (draft: ContactDraft, person: QueueItem) => {
@@ -231,6 +239,7 @@ export default function CallCard({ event }: { event: EventInfo }) {
           </button>
         )}
       </div>
+
     </>
   );
 }
@@ -279,7 +288,7 @@ function Card({
       /* חוצה-מקור — נופלים לניווט הרגיל */
     }
   }
-
+  const maleMsg = encodeURIComponent(`שלום , רציתי לשאול לגבי...`);
   return (
     <div className="card">
       <div className="card-id">
@@ -300,8 +309,8 @@ function Card({
         </a>
         <a
           className="wa"
-          href={`https://wa.me/${person.phoneE164.replace("+", "")}`}
-          target="_top"
+          href={`https://wa.me/${person.phoneE164.replace("+", "")}?text=${maleMsg}`}
+          //target="_top"
           rel="noopener"
           onClick={openExternal}
         >

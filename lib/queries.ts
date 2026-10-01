@@ -519,3 +519,29 @@ export async function getAwaitingCount(
 
   return count ?? 0;
 }
+
+/**return the list of people awaiting whatsapp message*/
+export async function getAllAwaiting(
+  eventId: string,
+): Promise<AwaitingItem[]>{
+  const { data, error } = await db
+    .from("awaiting_whatsapp_queue")
+    .select(
+      "assignment_id, person_id, full_name, phone_e164, grade, notes, waiting_since",
+    )
+    .eq("event_id", eventId)
+    .order("waiting_since", { ascending: true });
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((r) => ({
+    assignmentId: r.assignment_id as string,
+    personId: r.person_id as string,
+    fullName: r.full_name as string,
+    phoneE164: r.phone_e164 as string,
+    grade: r.grade as string | null,
+    note: r.notes as string | null,
+    waitingSince: r.waiting_since as string,
+  }));
+}
+
