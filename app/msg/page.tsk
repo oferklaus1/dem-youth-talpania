@@ -1,0 +1,80 @@
+import { cookies } from "next/headers";
+import { createClient } from "@supabase/supabase-js"; // Or use your project's configured supabase client
+
+// Initialize Supabase client (make sure to set your env variables)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// Server Action to handle saving a new message
+async function saveMessage(formData: FormData) {
+  "use server";
+  
+  const text = formData.get("text") as string;
+  const male = formData.get("male") === "on";
+
+  if (!text) return;
+
+  await supabase.from("messages").insert([{ text, male }]);
+}
+
+export default async function DefaultMessage() {
+  // Fetch previously saved messages from Supabase
+  const { data: messages, error } = await supabase
+    .from("messages")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return (
+    <div className="scroll max-w-md mx-auto p-4">
+      <p className="pervMsg font-bold mb-4">
+        ההודעות הקודמות ששמורות אצלך:
+      </p>
+
+      {/* Intelligent Rendering using .map() */}
+      <div className="space-y-2 mb-6">
+        {messages && messages.length > 0 ? (
+          messages.map((msg) => (
+            <div key={msg.id} className="p-3 border rounded shadow-sm bg-white">
+              <p className="prevMsg text-gray-800">{msg.text}</p>
+              <span className="text-xs text-gray-500">
+                {msg.male ? "הודעה בלשון זכר" : "הודעה בלשון נקבה"}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-400">אין הודעות שמורות עדיין.</p>
+        )}
+      </div>
+
+      {/* Form to Submit a New Message */}
+      <form action={saveMessage} className="space-y-4">
+        <input 
+          type="text" 
+          name="text" 
+          className="message border p-2 w-full rounded" 
+          placeholder="הקלד הודעה חדשה..."
+          required 
+        />
+        
+        <div className="flex items-center gap-2">
+          <input 
+            type="checkbox" 
+            className="male" 
+            id="male" 
+            name="male" 
+          />
+          <label htmlFor="male">לשון זכר</label>
+        </div>
+
+        <button 
+          type="submit" 
+          className="submit bg-blue-600 text-white p-2 rounded w-full"
+        >
+          שמור הודעה
+        </button>
+      </form>
+    </div>
+  );
+}
